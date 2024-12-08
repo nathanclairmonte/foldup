@@ -1,0 +1,24 @@
+# https://taskfile.dev
+
+version: "3"
+
+env:
+  SRC_FOLDER: ./src
+  TEST_FOLDER: ./tests
+
+tasks:
+  default:
+    cmds:
+      - task --list-all
+
+  list:
+    cmds:
+      - task --list-all
+
+  lint:
+    cmds:
+      - uv run ruff check $SRC_FOLDER $TEST_FOLDER
+
+  format:
+    cmds:
+      - uv run ruff format $SRC_FOLDER

@@ -20,7 +20,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project.scripts]
-fold = "src.cli:main"
+fold-cli = "src.cli:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src"]

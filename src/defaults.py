@@ -16,4 +16,5 @@ DEFAULT_CONFIG = {
     "max_file_size_mb": 1,
     "include_binary_files": False,
     "show_processed_files": False,
+    "estimate_tokens": False,
 }

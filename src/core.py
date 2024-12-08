@@ -1,5 +1,3 @@
-# src/core.py
-
 from pathlib import Path
 from typing import List, Set, Tuple
 
@@ -59,13 +57,14 @@ def generate_tree(
     return "\n".join(tree_str)
 
 
-def process_file(file_path: Path, root_path: Path) -> Tuple[str, bool]:
+def process_file(file_path: Path, root_path: Path, stats: dict) -> Tuple[str, bool]:
     """
     Process a single file and generate its markdown representation with appropriate code fencing.
 
     Args:
         file_path: Path to the file being processed
         root_path: Root directory path, used to generate relative paths
+        stats: Dictionary to track processing statistics
 
     Returns:
         Tuple containing:
@@ -83,6 +82,8 @@ def process_file(file_path: Path, root_path: Path) -> Tuple[str, bool]:
         content.append("```plaintext")
         content.append("<!-- binary file contents omitted -->")
         content.append("```")
+        stats["skipped_files"] += 1
+        stats["skipped_file_list"].append(str(rel_path))
         return "\n".join(content), False
 
     # get appropriate language for code fence
@@ -100,6 +101,8 @@ def process_file(file_path: Path, root_path: Path) -> Tuple[str, bool]:
         content.append("```plaintext")
         content.append("<!-- file contents omitted: encoding error -->")
         content.append("```")
+        stats["skipped_files"] += 1
+        stats["skipped_file_list"].append(str(rel_path))
         return "\n".join(content), False
 
 
@@ -131,21 +134,23 @@ def generate_markdown(
         "skipped_files": 0,
         "total_size": 0,
         "processed_file_list": [],
+        "skipped_file_list": [],  # New list to track skipped files
     }
 
     def process_directory(path: Path) -> List[str]:
         if should_exclude(path, exclude_patterns, max_size_mb):
+            if path.is_file():
+                stats["skipped_files"] += 1
+                stats["skipped_file_list"].append(str(path.relative_to(root_path)))
             return []
 
         dir_content = []
         if path.is_file():
-            file_content, success = process_file(path, root_path)
+            file_content, success = process_file(path, root_path, stats)
             if success:
                 stats["processed_files"] += 1
                 stats["total_size"] += path.stat().st_size
                 stats["processed_file_list"].append(str(path.relative_to(root_path)))
-            else:
-                stats["skipped_files"] += 1
             dir_content.append(file_content)
         else:
             for item in sorted(path.iterdir()):

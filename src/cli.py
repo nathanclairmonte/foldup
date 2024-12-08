@@ -3,7 +3,7 @@ from pathlib import Path
 import click
 
 from src.core import generate_markdown
-from src.utils import read_config
+from src.utils import get_estimated_token_count, read_config
 
 
 @click.command()
@@ -34,8 +34,19 @@ from src.utils import read_config
     default=False,
     help="Include list of processed files in output (default: False)",
 )
+@click.option(
+    "--estimate-tokens",
+    is_flag=True,
+    default=False,
+    help="Estimate tokens in output (default: False)",
+)
 def main(
-    path: str, output: str, config: str, max_size: float, show_files: bool
+    path: str,
+    output: str,
+    config: str,
+    max_size: float,
+    show_files: bool,
+    estimate_tokens: bool,
 ) -> None:
     """
     Fold a codebase into a single markdown file for LLM consumption.
@@ -58,6 +69,8 @@ def main(
             config_data["max_file_size_mb"] = max_size
         if show_files:
             config_data["show_processed_files"] = True
+        if estimate_tokens:
+            config_data["estimate_tokens"] = True
 
         # generate the markdown
         click.echo(f"Processing directory: {root_path}")
@@ -80,14 +93,28 @@ def main(
         click.echo(f"Files skipped: {stats['skipped_files']}")
         click.echo(f"Total source size processed: {stats['total_size'] / 1024:.1f} KB")
         click.echo(f"Output file size: {output_size:.1f} KB")
-        if show_files:
-            click.echo("\nFiles processed:")
-            for file_path in sorted(stats["processed_file_list"]):
-                click.echo(f"- {file_path}")
-        click.echo(f"\nOutput written to: {output_path}")
+        if estimate_tokens or config_data.get("estimate_tokens", False):
+            token_count = get_estimated_token_count(content)
+            if token_count > 0:
+                click.echo(f"Estimated tokens (GPT-4): {token_count:,}")
+
+        if show_files or config_data.get("show_processed_files", False):
+            if stats["processed_file_list"]:
+                click.echo("\nFiles processed:")
+                for file_path in sorted(stats["processed_file_list"]):
+                    click.echo(f"{click.style('*', fg='green')} {file_path}")
+
+            if stats["skipped_file_list"]:
+                click.echo("\nFiles skipped:")
+                for file_path in sorted(stats["skipped_file_list"]):
+                    click.echo(f"{click.style('*', fg='red')} {file_path}")
+
+        click.echo(
+            f"\nDone! Output written to: {click.style(str(output_path), fg='green')} ✅"
+        )
 
     except Exception as e:
-        click.echo(f"Error: {str(e)}", err=True)
+        click.echo(f"Something went wrong ❌: {str(e)}", err=True)
         raise click.Abort()
 
 

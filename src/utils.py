@@ -1,9 +1,29 @@
 from pathlib import Path
 from typing import Set
 
+import tiktoken
 import yaml
 
 from src.defaults import DEFAULT_CONFIG
+
+
+def get_estimated_token_count(text: str, model: str = "gpt-4") -> int:
+    """
+    Estimate the number of tokens in a text string.
+
+    Args:
+        text: The text to analyze
+        model: The model to use for tokenization (default: gpt-4)
+
+    Returns:
+        Estimated token count
+    """
+    try:
+        encoding = tiktoken.encoding_for_model(model)
+        return len(encoding.encode(text))
+    except Exception as e:
+        print(f"Warning: Could not estimate tokens: {str(e)}")
+        return 0
 
 
 def get_file_extension(file_path: Path) -> str:

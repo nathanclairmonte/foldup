@@ -1,0 +1,9 @@
+[project]
+name = "fold"
+version = "0.1.0"
+description = "Fold your codebase into a single, easily digestible Markdown file for consumption by an LLM."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pyyaml>=6.0.2",
+]

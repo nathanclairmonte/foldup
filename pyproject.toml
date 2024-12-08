@@ -5,5 +5,11 @@ description = "Fold your codebase into a single, easily digestible Markdown file
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "click>=8.1.7",
     "pyyaml>=6.0.2",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.8.2",
 ]

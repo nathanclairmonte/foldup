@@ -2,8 +2,8 @@ from pathlib import Path
 
 import click
 
-from .core import generate_markdown
-from .utils import read_config
+from src.core import generate_markdown
+from src.utils import read_config
 
 
 @click.command()
@@ -28,7 +28,15 @@ from .utils import read_config
     default=1.0,
     help="Maximum file size in MB to process (default: 1.0)",
 )
-def main(path: str, output: str, config: str, max_size: float) -> None:
+@click.option(
+    "--show-files",
+    is_flag=True,
+    default=False,
+    help="Include list of processed files in output (default: False)",
+)
+def main(
+    path: str, output: str, config: str, max_size: float, show_files: bool
+) -> None:
     """
     Fold a codebase into a single markdown file for LLM consumption.
 
@@ -42,24 +50,41 @@ def main(path: str, output: str, config: str, max_size: float) -> None:
         config_path = Path(config)
 
         # read configuration
-        config_data = read_config(config_path)
+        config_data = read_config(config_path, root_path)
         exclude_patterns = set(config_data.get("exclude", []))
 
-        # override max file size if specified in command
-        if max_size != 1.0:  # only override if user specified a different value
+        # override config values with command line options
+        if max_size != 1.0:
             config_data["max_file_size_mb"] = max_size
+        if show_files:
+            config_data["show_processed_files"] = True
 
         # generate the markdown
         click.echo(f"Processing directory: {root_path}")
-        content = generate_markdown(
-            root_path, exclude_patterns, config_data["max_file_size_mb"]
+        content, stats = generate_markdown(
+            root_path,
+            exclude_patterns,
+            config_data["max_file_size_mb"],
         )
 
         # write output
         with open(output_path, "w", encoding="utf-8") as f:
             f.write(content)
 
-        click.echo(f"Successfully generated: {output_path}")
+        # calculate output file size
+        output_size = output_path.stat().st_size / 1024  # size in KB
+
+        # print statistics to terminal
+        click.echo("\nProcessing Statistics:")
+        click.echo(f"Files processed: {stats['processed_files']}")
+        click.echo(f"Files skipped: {stats['skipped_files']}")
+        click.echo(f"Total source size processed: {stats['total_size'] / 1024:.1f} KB")
+        click.echo(f"Output file size: {output_size:.1f} KB")
+        if show_files:
+            click.echo("\nFiles processed:")
+            for file_path in sorted(stats["processed_file_list"]):
+                click.echo(f"- {file_path}")
+        click.echo(f"\nOutput written to: {output_path}")
 
     except Exception as e:
         click.echo(f"Error: {str(e)}", err=True)

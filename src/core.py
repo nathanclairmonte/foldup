@@ -3,7 +3,7 @@
 from pathlib import Path
 from typing import List, Set, Tuple
 
-from .utils import get_file_extension, is_binary_file, should_exclude
+from src.utils import get_file_extension, is_binary_file, should_exclude
 
 
 def generate_tree(
@@ -104,10 +104,12 @@ def process_file(file_path: Path, root_path: Path) -> Tuple[str, bool]:
 
 
 def generate_markdown(
-    root_path: Path, exclude_patterns: Set[str], max_size_mb: float = 1
-) -> str:
+    root_path: Path,
+    exclude_patterns: Set[str],
+    max_size_mb: float = 1,
+) -> Tuple[str, dict]:
     """
-    Generate a complete markdown document containing the directory tree and all file contents.
+    Generate the complete markdown document containing tree and file contents.
 
     Args:
         root_path: Path object representing the root directory to process
@@ -115,17 +117,21 @@ def generate_markdown(
         max_size_mb: Maximum file size in megabytes to include in the output
 
     Returns:
-        String containing the complete markdown document with:
-            - Project tree visualization
-            - Contents of all processed files
-            - Processing statistics
+        Tuple containing:
+            - String: The complete markdown document
+            - Dict: Processing statistics
     """
     # start with project tree
     content = ["# PROJECT TREE\n"]
     content.append(generate_tree(root_path, exclude_patterns, max_size_mb))
 
     # track some statistics
-    stats = {"processed_files": 0, "skipped_files": 0, "total_size": 0}
+    stats = {
+        "processed_files": 0,
+        "skipped_files": 0,
+        "total_size": 0,
+        "processed_file_list": [],
+    }
 
     def process_directory(path: Path) -> List[str]:
         if should_exclude(path, exclude_patterns, max_size_mb):
@@ -137,6 +143,7 @@ def generate_markdown(
             if success:
                 stats["processed_files"] += 1
                 stats["total_size"] += path.stat().st_size
+                stats["processed_file_list"].append(str(path.relative_to(root_path)))
             else:
                 stats["skipped_files"] += 1
             dir_content.append(file_content)
@@ -149,10 +156,4 @@ def generate_markdown(
     # process all files
     content.extend(process_directory(root_path))
 
-    # add statistics footer
-    content.append("\n# PROCESSING STATISTICS\n")
-    content.append(f"- Files processed: {stats['processed_files']}")
-    content.append(f"- Files skipped: {stats['skipped_files']}")
-    content.append(f"- Total size processed: {stats['total_size'] / 1024:.1f} KB")
-
-    return "\n".join(content)
+    return "\n".join(content), stats

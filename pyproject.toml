@@ -1,7 +1,7 @@
 [project]
-name = "fold"
+name = "foldup"
 version = "0.1.0"
-description = "Fold your codebase into a single, easily digestible Markdown file for consumption by an LLM."
+description = "Fold your codebase into a single Markdown file for passing to an LLM."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -20,7 +20,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project.scripts]
-fold-cli = "src.cli:main"
+foldup = "src.cli:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src"]

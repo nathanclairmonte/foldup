@@ -19,8 +19,8 @@ from src.utils import get_estimated_token_count, read_config
     "-c",
     "--config",
     type=click.Path(exists=False),
-    default="fold.yaml",
-    help="Config file path (default: fold.yaml)",
+    default="foldup.yaml",
+    help="Config file path (default: foldup.yaml)",
 )
 @click.option(
     "--max-size",
@@ -29,12 +29,14 @@ from src.utils import get_estimated_token_count, read_config
     help="Maximum file size in MB to process (default: 1.0)",
 )
 @click.option(
+    "-sf",
     "--show-files",
     is_flag=True,
     default=False,
     help="Include list of processed files in output (default: False)",
 )
 @click.option(
+    "-t",
     "--estimate-tokens",
     is_flag=True,
     default=False,

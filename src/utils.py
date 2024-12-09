@@ -75,7 +75,7 @@ def get_file_extension(file_path: Path) -> str:
         "": "plaintext",
     }
 
-    # handle dotfiles (like .gitignore, .env)
+    # handle dotfiles (like .gitignore, .prettierrc)
     if file_path.name.startswith("."):
         return EXTENSION_MAP.get(file_path.name, "plaintext")
 

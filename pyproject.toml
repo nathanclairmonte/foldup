@@ -3,7 +3,7 @@ name = "foldup"
 version = "0.1.0"
 description = "Fold your codebase into a single Markdown file for passing to an LLM."
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.9"
 dependencies = [
     "click>=8.1.7",
     "pyyaml>=6.0.2",

@@ -7,7 +7,7 @@ DEFAULT_CONFIG = {
         "venv",
         ".venv",
         ".env",
-        ".env.local",
+        ".env.*",
         ".idea",
         ".vscode",
         "dist",

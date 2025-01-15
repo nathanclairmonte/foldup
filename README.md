@@ -15,31 +15,35 @@ cd foldup
 pip install .
 ```
 
-Now you ~~can~~ should be able to run `foldup` from anywhere in your system! Lmk if things don't work though.
+Now you ~~can~~ _should be able to_ run `foldup` from anywhere in your system! Lmk if anything doesn't work though.
 
 ## Usage
 
 ```bash
 # Process current directory
 foldup
+```
 
+### Run with Options
+
+```bash
 # Process specific directory
 foldup /path/to/project
 
 # Custom output filename (default: codebase.md)
-foldup . -o output.md
+foldup -o output.md
 
 # Display list of processed & skipped files
-foldup . --show-files
+foldup --show-files
 
 # Display estimated token count (takes a few extra ms)
-foldup . --estimate-tokens
+foldup --estimate-tokens
 
-# Use custom config file
-foldup . -c custom-config.yaml
+# Use custom config file (defaults to foldup.yaml in project root)
+foldup -c custom-config.yaml
 
 # Set maximum input file size (in MB)
-foldup . --max-size 2.5
+foldup --max-size 2.5
 ```
 
 ## Configuration
@@ -58,17 +62,30 @@ temp/
 
 2. **Config File (foldup.yaml)**:
 ```yaml
-# Example configuration
+# Default config
 exclude:
+  # common things to ignore
+  - __pycache__
   - node_modules
   - .git
   - venv
-  - __pycache__
+  - .venv
+  - .env
+  - .env.*
+  - .idea
+  - .vscode
   - dist
   - build
+  - .next
+  - coverage
+  # foldup-related
+  - codebase.md
+  - .foldignore
+  - foldup.yaml
 max_file_size_mb: 1.0
 include_binary_files: false
-show_processed_files: true
+show_processed_files: false
+estimate_tokens: false
 ```
 
 ## Output Format
@@ -155,6 +172,7 @@ uv run python -m src.cli
 - [x] Facilitate estimating the number of tokens in the output file
 - [x] Rename to `foldup` (I think?). Sounds nicer lol and easier to type `foldup` than `fold-cli` like i have it rn
 - [x] Update README with installation and usage instructions
+- [ ] Add an `--only-tree` flag to only generate just the project tree and not the file contents
 - [ ] Faciliate glob patterns for excluding files in config or `.foldignore`
 - [ ] Add `--version` flag
 - [ ] Sort list of output files by size (number of lines? number of chars or tokens?)

@@ -1,8 +1,9 @@
 from pathlib import Path
-from typing import Set
 
 import tiktoken
 import yaml
+from pathspec import PathSpec
+from pathspec.patterns import GitWildMatchPattern
 
 from src.defaults import DEFAULT_CONFIG
 
@@ -82,32 +83,6 @@ def get_file_extension(file_path: Path) -> str:
     return EXTENSION_MAP.get(file_path.suffix.lower(), "plaintext")
 
 
-def read_foldignore(root_path: Path) -> Set[str]:
-    """
-    Read .foldignore file if it exists and return patterns to ignore.
-
-    Args:
-        root_path: Path to the directory containing .foldignore
-
-    Returns:
-        Set of patterns to ignore
-    """
-    ignore_file = root_path / ".foldignore"
-    ignore_patterns = set()
-
-    if ignore_file.exists():
-        try:
-            with open(ignore_file, "r") as f:
-                for line in f:
-                    line = line.strip()
-                    if line and not line.startswith("#"):
-                        ignore_patterns.add(line)
-        except Exception as e:
-            print(f"warning: error reading .foldignore: {e}")
-
-    return ignore_patterns
-
-
 def read_config(config_path: Path, root_path: Path) -> dict:
     """
     Read and parse configuration from config file and .foldignore.
@@ -119,45 +94,65 @@ def read_config(config_path: Path, root_path: Path) -> dict:
     Returns:
         Dictionary containing merged configuration settings
     """
+    config = DEFAULT_CONFIG.copy()
 
-    # merge .foldignore patterns with defaults
-    foldignore_patterns = read_foldignore(root_path)
-    DEFAULT_CONFIG["exclude"].extend(foldignore_patterns)
+    # Get all patterns - both from defaults and .foldignore
+    patterns = []
 
-    if not config_path.exists():
-        return DEFAULT_CONFIG
+    # Add default exclude patterns
+    patterns.extend(config["exclude"])
 
-    try:
-        with open(config_path) as f:
-            user_config = yaml.safe_load(f)
+    # Add patterns from .foldignore
+    ignore_file = root_path / ".foldignore"
+    if ignore_file.exists():
+        try:
+            with open(ignore_file, "r") as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith("#"):
+                        patterns.append(line)
+        except Exception as e:
+            print(f"warning: error reading .foldignore: {e}")
 
-        # if user config has exclude patterns, merge with .foldignore
-        if user_config.get("exclude"):
-            user_config["exclude"].extend(foldignore_patterns)
+    # Create PathSpec with all patterns
+    config["pathspec"] = PathSpec.from_lines(GitWildMatchPattern, patterns)
 
-        return {**DEFAULT_CONFIG, **user_config}
-    except Exception as e:
-        print(f"warning: error reading config file: {e}")
-        return DEFAULT_CONFIG
+    # Read user config if it exists
+    if config_path.exists():
+        try:
+            with open(config_path) as f:
+                user_config = yaml.safe_load(f)
+                if user_config:
+                    # If user config has additional exclude patterns, add them
+                    if "exclude" in user_config:
+                        config["pathspec"] = PathSpec.from_lines(
+                            GitWildMatchPattern, patterns + user_config["exclude"]
+                        )
+                    # Update other config values
+                    config.update(user_config)
+        except Exception as e:
+            print(f"warning: error reading config file: {e}")
+
+    return config
 
 
-def should_exclude(
-    path: Path, exclude_patterns: Set[str], max_size_mb: float = 1
-) -> bool:
+def should_exclude(path: Path, pathspec: PathSpec, max_size_mb: float = 1) -> bool:
     """
     Determine if a path should be excluded based on patterns and size.
 
     Args:
         path: Path to check
-        exclude_patterns: Set of patterns to exclude
+        pathspec: PathSpec object for pattern matching
         max_size_mb: Maximum file size in megabytes
 
     Returns:
         Boolean indicating if the path should be excluded
     """
-    # check patterns
+    # Convert to relative path string for matching
     str_path = str(path)
-    if any(pattern in str_path for pattern in exclude_patterns):
+
+    # Check if path matches any ignore pattern
+    if pathspec.match_file(str_path):
         return True
 
     # check file size if it's a file

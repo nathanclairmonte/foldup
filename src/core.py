@@ -1,18 +1,18 @@
 from pathlib import Path
-from typing import List, Set, Tuple
+from typing import List, Tuple
+
+from pathspec import PathSpec
 
 from src.utils import get_file_extension, is_binary_file, should_exclude
 
 
-def generate_tree(
-    root_path: Path, exclude_patterns: Set[str], max_size_mb: float = 1
-) -> str:
+def generate_tree(root_path: Path, pathspec: PathSpec, max_size_mb: float = 1) -> str:
     """
     Generate a tree visualization of the directory structure starting from the root path.
 
     Args:
         root_path: Path object representing the root directory to start from
-        exclude_patterns: Set of patterns used to determine which files/directories to exclude
+        pathspec: PathSpec object for pattern matching
         max_size_mb: Maximum file size in megabytes to include in the tree
 
     Returns:
@@ -21,7 +21,7 @@ def generate_tree(
     tree_str = [str(root_path.name)]
 
     def add_to_tree(path: Path, prefix: str = "", is_last: bool = True):
-        if should_exclude(path, exclude_patterns, max_size_mb):
+        if should_exclude(path, pathspec, max_size_mb):
             return
 
         # prepare the appropriate prefix for this item
@@ -33,7 +33,7 @@ def generate_tree(
             items = [
                 p
                 for p in sorted(path.iterdir())
-                if not should_exclude(p, exclude_patterns, max_size_mb)
+                if not should_exclude(p, pathspec, max_size_mb)
             ]
 
             # prepare the prefix for children
@@ -48,7 +48,7 @@ def generate_tree(
     root_items = [
         p
         for p in sorted(root_path.iterdir())
-        if not should_exclude(p, exclude_patterns, max_size_mb)
+        if not should_exclude(p, pathspec, max_size_mb)
     ]
 
     for i, path in enumerate(root_items):
@@ -108,7 +108,7 @@ def process_file(file_path: Path, root_path: Path, stats: dict) -> Tuple[str, bo
 
 def generate_markdown(
     root_path: Path,
-    exclude_patterns: Set[str],
+    pathspec: PathSpec,
     max_size_mb: float = 1,
 ) -> Tuple[str, dict]:
     """
@@ -116,7 +116,7 @@ def generate_markdown(
 
     Args:
         root_path: Path object representing the root directory to process
-        exclude_patterns: Set of patterns used to determine which files/directories to exclude
+        pathspec: PathSpec object for pattern matching
         max_size_mb: Maximum file size in megabytes to include in the output
 
     Returns:
@@ -126,7 +126,7 @@ def generate_markdown(
     """
     # start with project tree
     content = ["# PROJECT TREE\n"]
-    content.append(generate_tree(root_path, exclude_patterns, max_size_mb))
+    content.append(generate_tree(root_path, pathspec, max_size_mb))
 
     # track some statistics
     stats = {
@@ -138,7 +138,7 @@ def generate_markdown(
     }
 
     def process_directory(path: Path) -> List[str]:
-        if should_exclude(path, exclude_patterns, max_size_mb):
+        if should_exclude(path, pathspec, max_size_mb):
             if path.is_file():
                 stats["skipped_files"] += 1
                 stats["skipped_file_list"].append(str(path.relative_to(root_path)))

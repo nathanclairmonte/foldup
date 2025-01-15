@@ -64,7 +64,6 @@ def main(
 
         # read configuration
         config_data = read_config(config_path, root_path)
-        exclude_patterns = set(config_data.get("exclude", []))
 
         # override config values with command line options
         if max_size != 1.0:
@@ -78,7 +77,7 @@ def main(
         click.echo(f"Processing directory: {root_path}")
         content, stats = generate_markdown(
             root_path,
-            exclude_patterns,
+            config_data["pathspec"],
             config_data["max_file_size_mb"],
         )
 

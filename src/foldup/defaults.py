@@ -20,4 +20,5 @@ DEFAULT_CONFIG = {
     "max_file_size_mb": 2.0,
     "show_processed_files": False,
     "estimate_tokens": False,
+    "tree_only": False,
 }

@@ -83,7 +83,8 @@ You can configure Foldup with command-line flags, a config file, or a `.foldigno
 | `-o, --output` | Custom output filename | `codebase.md` |
 | `-c, --config` | Custom config filename | `foldup.yaml` |
 | `-sf, --show-files` | Include list of processed files in output | `False` |
-| `-t, --estimate-tokens` | Estimate token count | `False` |
+| `-et, --estimate-tokens` | Estimate token count | `False` |
+| `-t, --tree-only` | Only generate the project tree | `False` |
 | `-ms, --max-size` | Maximum file size in MB to process | `2.0` |
 
 ### Config File (default: `foldup.yaml`)

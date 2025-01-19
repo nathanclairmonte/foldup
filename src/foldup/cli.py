@@ -15,7 +15,7 @@ from src.foldup.utils import get_estimated_token_count, print_version, read_conf
     callback=print_version,
     expose_value=False,
     is_eager=True,
-    help="show version and exit",
+    help="Show version and exit",
 )
 @click.option(
     "-o",
@@ -46,11 +46,18 @@ from src.foldup.utils import get_estimated_token_count, print_version, read_conf
     help="Include list of processed files in output (default: False)",
 )
 @click.option(
-    "-t",
+    "-et",
     "--estimate-tokens",
     is_flag=True,
     default=False,
     help="Estimate tokens in output (default: False)",
+)
+@click.option(
+    "-t",
+    "--tree-only",
+    is_flag=True,
+    default=False,
+    help="Only generate the project tree and not the file contents (default: False)",
 )
 def main(
     path: str,
@@ -59,6 +66,7 @@ def main(
     max_size: float,
     show_files: bool,
     estimate_tokens: bool,
+    tree_only: bool,
 ) -> None:
     """
     Fold a codebase into a single markdown file for LLM consumption.
@@ -82,6 +90,8 @@ def main(
             config_data["show_processed_files"] = True
         if estimate_tokens:
             config_data["estimate_tokens"] = True
+        if tree_only:
+            config_data["tree_only"] = True
 
         # generate the markdown
         click.echo(f"Processing directory: {root_path}")
@@ -89,6 +99,7 @@ def main(
             root_path,
             config_data["pathspec"],
             config_data["max_file_size_mb"],
+            config_data.get("tree_only", False),
         )
 
         # write output
@@ -98,7 +109,12 @@ def main(
         # calculate output file size
         output_size = output_path.stat().st_size / 1024  # size in KB
 
-        # print statistics to terminal
+        # print to terminal
+        if tree_only:
+            click.echo(
+                "\n⚠️  The --tree-only flag is set, only the "
+                "project tree will be generated. ⚠️"
+            )
         click.echo("\nProcessing Statistics:")
         click.echo(f"Files processed: {stats['processed_files']}")
         click.echo(f"Files skipped: {stats['skipped_files']}")

@@ -116,7 +116,7 @@ wheels = [
 ]
 
 [[package]]
-name = "example-package-n4than"
+name = "foldup"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

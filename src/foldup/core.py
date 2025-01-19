@@ -110,14 +110,16 @@ def generate_markdown(
     root_path: Path,
     pathspec: PathSpec,
     max_size_mb: float = 1,
+    tree_only: bool = False,
 ) -> Tuple[str, dict]:
     """
-    Generate the complete markdown document containing tree and file contents.
+    Generate the complete markdown document containing tree and optionally file contents.
 
     Args:
         root_path: Path object representing the root directory to process
         pathspec: PathSpec object for pattern matching
         max_size_mb: Maximum file size in megabytes to include in the output
+        tree_only: If True, only generate the project tree without file contents
 
     Returns:
         Tuple containing:
@@ -128,14 +130,18 @@ def generate_markdown(
     content = ["# PROJECT TREE\n"]
     content.append(generate_tree(root_path, pathspec, max_size_mb))
 
-    # track some statistics
+    # initialize stats
     stats = {
         "processed_files": 0,
         "skipped_files": 0,
         "total_size": 0,
         "processed_file_list": [],
-        "skipped_file_list": [],  # New list to track skipped files
+        "skipped_file_list": [],
     }
+
+    # if tree_only, return early with just the tree
+    if tree_only:
+        return "\n".join(content), stats
 
     def process_directory(path: Path) -> List[str]:
         if should_exclude(path, pathspec, max_size_mb):

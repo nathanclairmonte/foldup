@@ -1,100 +1,13 @@
 # foldup
 
-A command-line tool that "folds" your codebase into a single Markdown file that can easily be fed into an LLM.
+A command-line tool that "folds" your codebase into a single Markdown file that can be easily passed to LLMs.
 
-## Installation
+The output `codebase.md` file includes:
+1. Your project tree
+2. The filepath and contents of each file in the codebase
 
-1. Clone the repository:
-```bash
-git clone https://github.com/nathanclairmonte/foldup.git
-cd foldup
-```
+Here's an example of what the output looks like for a very simple project:
 
-2. Install as a CLI tool:
-```bash
-pip install .
-```
-
-Now you ~~can~~ _should be able to_ run `foldup` from anywhere in your system! Lmk if anything doesn't work though.
-
-## Usage
-
-```bash
-# Process current directory
-foldup
-```
-
-### Run with Options
-
-```bash
-# Process specific directory
-foldup /path/to/project
-
-# Custom output filename (default: codebase.md)
-foldup -o output.md
-
-# Display list of processed & skipped files
-foldup --show-files
-
-# Display estimated token count (takes a few extra ms)
-foldup --estimate-tokens
-
-# Use custom config file (defaults to foldup.yaml in project root)
-foldup -c custom-config.yaml
-
-# Set maximum input file size (in MB)
-foldup --max-size 2.5
-```
-
-## Configuration
-
-You can configure foldup using two methods:
-
-1. **.foldignore File**:
-Create a `.foldignore` file in your project root:
-```
-# Example .foldignore
-*.log
-temp/
-*.pyc
-.DS_Store
-```
-
-2. **Config File (foldup.yaml)**:
-```yaml
-# Default config
-exclude:
-  # common things to ignore
-  - __pycache__
-  - node_modules
-  - .git
-  - venv
-  - .venv
-  - .env
-  - .env.*
-  - .idea
-  - .vscode
-  - dist
-  - build
-  - .next
-  - coverage
-  # foldup-related
-  - codebase.md
-  - .foldignore
-  - foldup.yaml
-max_file_size_mb: 1.0
-include_binary_files: false
-show_processed_files: false
-estimate_tokens: false
-```
-
-## Output Format
-
-The generated markdown file includes:
-1. Project tree visualization
-2. Filepath and contents of each file
-
-Example output:
 ````markdown
 # PROJECT TREE
 
@@ -134,16 +47,96 @@ def multiply(a, b):
 ```
 ````
 
+## Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/nathanclairmonte/foldup.git
+cd foldup
+```
+
+2. Install as a CLI tool:
+```bash
+pip install .
+```
+
+Now you should be able to run `foldup` from anywhere in your system! Please let me know if anything doesn't work though.
+
+## Usage
+
+```bash
+# Process current directory
+foldup .
+
+# Process specific directory
+foldup /path/to/project
+```
+
+## Configuration
+
+You can configure Foldup with command-line flags, a config file, or a `.foldignore` file.
+
+### Command-line Flags
+| Flag | Description | Default |
+| --- | --- | --- |
+| `-o` | Custom output filename | `codebase.md` |
+| `-c` | Custom config filename | `foldup.yaml` |
+| `--show-files` | Include list of processed files in output | `False` |
+| `--estimate-tokens` | Estimate token count | `False` |
+| `--max-size` | Maximum file size in MB to process | `2.0` |
+
+### Config File (default: `foldup.yaml`)
+
+Create a `foldup.yaml` config file in your project root to customize the behavior of Foldup. This example config file shows all the default settings. You can specify a custom config file with the `-c` flag.
+
+```yaml
+# Default config
+exclude:
+  # common files to exclude
+  - __pycache__
+  - node_modules
+  - .git
+  - venv
+  - .venv
+  - .env
+  - .env.*
+  - .idea
+  - .vscode
+  - dist
+  - build
+  - .next
+  - coverage
+
+  # foldup-related
+  - codebase.md
+max_file_size_mb: 2.0
+show_processed_files: false
+estimate_tokens: false
+```
+
+### `.foldignore` File
+
+You can also configure foldup to ignore certain directories or files by creating a `.foldignore` file in your project root. The syntax is the same as `.gitignore`.
+
+```
+# Example .foldignore
+*.log
+temp/
+*.pyc
+.DS_Store
+```
+
 ## Estimated Token Count
 
 The estimated token count can be optionally displayed by passing the `--estimate-tokens` flag. Foldup uses the [tiktoken](https://github.com/openai/tiktoken) library to estimate token count. Remember that this is just an estimate, the actual token count may vary (but probably not by an insane amount).
 
 
-> [!NOTE] 
-> Tiktoken uses the GPT-4 tokenizer. For ChatGPT, it should be relatively close. For Claude, it could be off by ±20%.
+> **N.B.** Tiktoken uses the GPT-4 tokenizer. For ChatGPT, it should be relatively close. For Claude, it could be off by ±20%.
 
 
 ## Development
+
+These steps require that you have the [UV project manager](https://docs.astral.sh/uv/getting-started/installation/) installed.
 
 1. Clone the repository:
 ```bash
@@ -160,25 +153,5 @@ uv sync
 
 4. Run the CLI tool locally:
 ```bash
-uv run python -m src.cli
+uv run python -m src.foldup.cli
 ```
-
----
-
-## TODO
-
-- [x] Add Taskfile for linting, testing, building, etc.
-- [x] Add support for a `.foldignore` file
-- [x] Facilitate estimating the number of tokens in the output file
-- [x] Rename to `foldup` (I think?). Sounds nicer lol and easier to type `foldup` than `fold-cli` like i have it rn
-- [x] Update README with installation and usage instructions
-- [ ] Add an `--only-tree` flag to only generate just the project tree and not the file contents
-- [ ] Faciliate glob patterns for excluding files in config or `.foldignore`
-- [ ] Add `--version` flag
-- [ ] Sort list of output files by size (number of lines? number of chars or tokens?)
-- [ ] Exclude image files as well, or any other non-text files
-- [ ] Tests
-- [ ] Add license
-- [ ] Package for release on PyPI: https://packaging.python.org/en/latest/tutorials/packaging-projects/
-- [ ] Add badges to README
-- [ ] Add GitHub Actions for linting, testing, building, and releasing

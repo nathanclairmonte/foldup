@@ -3,11 +3,20 @@ from pathlib import Path
 import click
 
 from src.foldup.core import generate_markdown
-from src.foldup.utils import get_estimated_token_count, read_config
+from src.foldup.utils import get_estimated_token_count, print_version, read_config
 
 
 @click.command()
 @click.argument("path", type=click.Path(exists=True), default=".")
+@click.option(
+    "-v",
+    "--version",
+    is_flag=True,
+    callback=print_version,
+    expose_value=False,
+    is_eager=True,
+    help="show version and exit",
+)
 @click.option(
     "-o",
     "--output",
@@ -23,6 +32,7 @@ from src.foldup.utils import get_estimated_token_count, read_config
     help="Config file path (default: foldup.yaml)",
 )
 @click.option(
+    "-ms",
     "--max-size",
     type=float,
     default=1.0,

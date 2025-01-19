@@ -79,11 +79,12 @@ You can configure Foldup with command-line flags, a config file, or a `.foldigno
 ### Command-line Flags
 | Flag | Description | Default |
 | --- | --- | --- |
-| `-o` | Custom output filename | `codebase.md` |
-| `-c` | Custom config filename | `foldup.yaml` |
-| `--show-files` | Include list of processed files in output | `False` |
-| `--estimate-tokens` | Estimate token count | `False` |
-| `--max-size` | Maximum file size in MB to process | `2.0` |
+| `-v, --version` | Print version | |
+| `-o, --output` | Custom output filename | `codebase.md` |
+| `-c, --config` | Custom config filename | `foldup.yaml` |
+| `-sf, --show-files` | Include list of processed files in output | `False` |
+| `-t, --estimate-tokens` | Estimate token count | `False` |
+| `-ms, --max-size` | Maximum file size in MB to process | `2.0` |
 
 ### Config File (default: `foldup.yaml`)
 

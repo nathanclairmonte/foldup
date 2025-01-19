@@ -1,10 +1,12 @@
 from pathlib import Path
 
+import click
 import tiktoken
 import yaml
 from pathspec import PathSpec
 from pathspec.patterns import GitWildMatchPattern
 
+from src.foldup import __version__
 from src.foldup.defaults import DEFAULT_CONFIG
 
 
@@ -182,3 +184,11 @@ def is_binary_file(file_path: Path) -> bool:
         return is_binary_string
     except Exception:
         return True  # if we can't read the file, assume it's binary
+
+
+def print_version(ctx, param, value):
+    """print version number"""
+    if not value:
+        return
+    click.echo(f"foldup v{__version__}")
+    ctx.exit()

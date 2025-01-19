@@ -5,7 +5,7 @@ import yaml
 from pathspec import PathSpec
 from pathspec.patterns import GitWildMatchPattern
 
-from src.example_package_n4than.defaults import DEFAULT_CONFIG
+from src.foldup.defaults import DEFAULT_CONFIG
 
 
 def get_estimated_token_count(text: str, model: str = "gpt-4") -> int:
@@ -96,13 +96,27 @@ def read_config(config_path: Path, root_path: Path) -> dict:
     """
     config = DEFAULT_CONFIG.copy()
 
-    # Get all patterns - both from defaults and .foldignore
+    # get all patterns - both from defaults and .foldignore
     patterns = []
 
-    # Add default exclude patterns
+    # add default exclude patterns
     patterns.extend(config["exclude"])
 
-    # Add patterns from .foldignore
+    # read user config if it exists
+    if config_path.exists():
+        try:
+            with open(config_path) as f:
+                user_config = yaml.safe_load(f)
+                if user_config:
+                    # if user config has additional exclude patterns, add them
+                    if "exclude" in user_config:
+                        patterns.extend(user_config["exclude"])
+                    # update other config values
+                    config.update(user_config)
+        except Exception as e:
+            print(f"warning: error reading config file: {e}")
+
+    # add patterns from .foldignore
     ignore_file = root_path / ".foldignore"
     if ignore_file.exists():
         try:
@@ -114,24 +128,8 @@ def read_config(config_path: Path, root_path: Path) -> dict:
         except Exception as e:
             print(f"warning: error reading .foldignore: {e}")
 
-    # Create PathSpec with all patterns
+    # create PathSpec with all patterns
     config["pathspec"] = PathSpec.from_lines(GitWildMatchPattern, patterns)
-
-    # Read user config if it exists
-    if config_path.exists():
-        try:
-            with open(config_path) as f:
-                user_config = yaml.safe_load(f)
-                if user_config:
-                    # If user config has additional exclude patterns, add them
-                    if "exclude" in user_config:
-                        config["pathspec"] = PathSpec.from_lines(
-                            GitWildMatchPattern, patterns + user_config["exclude"]
-                        )
-                    # Update other config values
-                    config.update(user_config)
-        except Exception as e:
-            print(f"warning: error reading config file: {e}")
 
     return config
 
@@ -148,10 +146,10 @@ def should_exclude(path: Path, pathspec: PathSpec, max_size_mb: float = 1) -> bo
     Returns:
         Boolean indicating if the path should be excluded
     """
-    # Convert to relative path string for matching
+    # convert to relative path string for matching
     str_path = str(path)
 
-    # Check if path matches any ignore pattern
+    # check if path matches any ignore pattern
     if pathspec.match_file(str_path):
         return True
 

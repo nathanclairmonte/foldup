@@ -1,6 +1,6 @@
 [project]
 name = "foldup"
-version = "0.1.0.dev1"
+version = "0.1.0.dev2"
 description = "Fold your codebase into a single Markdown file for passing to an LLM."
 readme = "README.md"
 requires-python = ">=3.9"

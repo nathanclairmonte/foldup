@@ -11,6 +11,7 @@
 - [x] Add a `--tree-only` flag to only generate just the project tree and not the file contents
 - [ ] Package for release on PyPI: https://packaging.python.org/en/latest/tutorials/packaging-projects/
 - [ ] Add GitHub Actions for releasing
+- [ ] Set up automatic versioning for releases
 - [ ] Tests
 - [ ] Sort list of output files by size (number of lines? number of chars or tokens?)
 - [ ] Add badges to README

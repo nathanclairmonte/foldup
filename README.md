@@ -114,6 +114,7 @@ exclude:
 max_file_size_mb: 2.0
 show_processed_files: false
 estimate_tokens: false
+tree_only: false
 ```
 
 ### `.foldignore` File

@@ -2,8 +2,8 @@ from pathlib import Path
 
 import click
 
-from src.core import generate_markdown
-from src.utils import get_estimated_token_count, read_config
+from src.example_package_n4than.core import generate_markdown
+from src.example_package_n4than.utils import get_estimated_token_count, read_config
 
 
 @click.command()

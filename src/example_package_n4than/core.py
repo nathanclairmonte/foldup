@@ -3,7 +3,11 @@ from typing import List, Tuple
 
 from pathspec import PathSpec
 
-from src.utils import get_file_extension, is_binary_file, should_exclude
+from src.example_package_n4than.utils import (
+    get_file_extension,
+    is_binary_file,
+    should_exclude,
+)
 
 
 def generate_tree(root_path: Path, pathspec: PathSpec, max_size_mb: float = 1) -> str:

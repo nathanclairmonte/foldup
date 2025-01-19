@@ -5,7 +5,7 @@ import yaml
 from pathspec import PathSpec
 from pathspec.patterns import GitWildMatchPattern
 
-from src.defaults import DEFAULT_CONFIG
+from src.example_package_n4than.defaults import DEFAULT_CONFIG
 
 
 def get_estimated_token_count(text: str, model: str = "gpt-4") -> int:

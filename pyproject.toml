@@ -1,15 +1,25 @@
 [project]
-name = "foldup"
+name = "example_package_n4than"
 version = "0.1.0"
 description = "Fold your codebase into a single Markdown file for passing to an LLM."
 readme = "README.md"
 requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
 dependencies = [
     "click>=8.1.7",
     "pathspec>=0.12.1",
     "pyyaml>=6.0.2",
     "tiktoken>=0.8.0",
 ]
+license = "MIT"
+license-files = ["LICENSE"]
+
+[project.urls]
+Homepage = "https://github.com/nathanclairmonte/example_package_n4than"
+Issues = "https://github.com/nathanclairmonte/example_package_n4than/issues"
 
 [dependency-groups]
 dev = [
@@ -21,7 +31,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project.scripts]
-foldup = "src.example_package_n4than.cli:main"
+epn = "src.example_package_n4than.cli:main"
 
-[tool.hatch.build.targets.wheel]
+[tool.hatch.build]
 packages = ["src"]
